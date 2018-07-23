@@ -103,13 +103,28 @@ function Read-xWebsite()
 
         foreach($binding in $website.Bindings.Collection)
         {
+			$splitBinding = $binding.BindingInformation.Replace("localhost","") -split ':';
             $currentBinding = "`r`n                MSFT_xWebBindingInformation`r`n" `
                 + "                {`r`n" `
                 + "                    Protocol = `"" + $binding.Protocol + "`";`r`n"
-            $port = $binding.BindingInformation.Replace(":", "").Replace("*", "").Replace("localhost","")
+			$ipAddress = $splitBinding[0]
+			$hostName = $splitBinding[2]
+            $port = $splitBinding[1]
+
+
+            if($null -ne $ipAddress -and "" -ne $port)
+            {
+                $currentBinding += "                    IPAddress = `'" + $ipAddress + "`';`r`n"
+            }
+
             if($null -ne $port -and "" -ne $port)
             {
-                $currentBinding += "                    Port = " + $binding.BindingInformation.Replace(":", "").Replace("*", "") + ";`r`n"
+                $currentBinding += "                    HostName = `'" + $hostName + "`';`r`n"
+            }
+
+            if($null -ne $port -and "" -ne $port)
+            {
+                $currentBinding += "                    Port      = `'" + $port + "`';`r`n"
             }
 
             if($binding.CertificateStoreName -eq "My" -or $binding.CertificateStoreName -eq "WebHosting")
