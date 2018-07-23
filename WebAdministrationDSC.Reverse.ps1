@@ -19,12 +19,12 @@
 
 #Requires -Modules @{ModuleName="ReverseDSC";ModuleVersion="1.9.2.0"},@{ModuleName="xWebAdministration";ModuleVersion="1.18.0.0"}
 
-<# 
+<#
 
-.DESCRIPTION 
+.DESCRIPTION
  Extracts the DSC Configuration of an existing IIS environment, allowing you to analyze it or to replicate it.
 
-#> 
+#>
 
 param()
 
@@ -47,16 +47,16 @@ catch {
     $Script:version = "N/A"
 }
 
-<## This is the main function for this script. It acts as a call dispatcher, calling the various functions required in the proper order to 
+<## This is the main function for this script. It acts as a call dispatcher, calling the various functions required in the proper order to
     get the full picture of the environment; #>
 function Orchestrator
-{        
+{
     <# Import the ReverseDSC Core Engine #>
     $module = "ReverseDSC"
     Import-Module -Name $module -Force
-    
-    
-    $Script:dscConfigContent += "<# Generated with WebAdministrationDSC.Reverse " + $script:version + " #>`r`n"   
+
+
+    $Script:dscConfigContent += "<# Generated with WebAdministrationDSC.Reverse " + $script:version + " #>`r`n"
     $Script:dscConfigContent += "Configuration $Script:configName`r`n"
     $Script:dscConfigContent += "{`r`n"
 
@@ -65,7 +65,7 @@ function Orchestrator
 
     $Script:dscConfigContent += "    Node $env:COMPUTERNAME`r`n"
     $Script:dscConfigContent += "    {`r`n"
-    
+
     Write-Host "Scanning xWebsite..." -BackgroundColor DarkGreen -ForegroundColor White
     Read-xWebsite
 
@@ -75,7 +75,7 @@ function Orchestrator
     Write-Host "Configuring Local Configuration Manager (LCM)..." -BackgroundColor DarkGreen -ForegroundColor White
     Set-LCM
 
-    $Script:dscConfigContent += "`r`n    }`r`n"           
+    $Script:dscConfigContent += "`r`n    }`r`n"
     $Script:dscConfigContent += "}`r`n"
 
     Write-Host "Setting Configuration Data..." -BackgroundColor DarkGreen -ForegroundColor White
@@ -86,11 +86,11 @@ function Orchestrator
 
 #region Reverse Functions
 function Read-xWebsite()
-{    
+{
     $module = Resolve-Path ($Script:DSCPath + "\DSCResources\MSFT_xWebsite\MSFT_xWebsite.psm1")
     Import-Module $module
     $params = Get-DSCFakeParameters -ModulePath $module
-    
+
     $webSites = Get-WebSite
 
     foreach($website in $webSites)
@@ -133,15 +133,15 @@ function Read-xWebsite()
                 {
                     $currentBinding += "                    CertificateThumbprint = `"" + $binding.CertificateHash + "`";`r`n"
                 }
-                $currentBinding += "                    CertificateStoreName  = `"" + $binding.CertificateStoreName + "`";`r`n"     
-            }       
+                $currentBinding += "                    CertificateStoreName  = `"" + $binding.CertificateStoreName + "`";`r`n"
+            }
             $currentBinding += "                }"
 
             $results.BindingInfo += $currentBinding
         }
 
         $AuthenticationInfo = "`r`n                MSFT_xWebAuthenticationInformation`r`n                {`r`n"
-        
+
         $prop = Get-WebConfigurationProperty `
         -Filter /system.WebServer/security/authentication/BasicAuthentication `
         -Name enabled `
@@ -181,11 +181,11 @@ function Read-xWebsite()
 }
 
 function Read-xWebAppPool()
-{    
+{
     $module = Resolve-Path ($Script:DSCPath + "\DSCResources\MSFT_xWebAppPool\MSFT_xWebAppPool.psm1")
     Import-Module $module
     $params = Get-DSCFakeParameters -ModulePath $module
-    
+
     $appPools = Get-WebConfiguration -Filter '/system.applicationHost/applicationPools/add'
 
     foreach($appPool in $appPools)
@@ -222,7 +222,7 @@ function Set-ConfigurationData
     $tempConfigDataContent += "        NodeName = `"$env:COMPUTERNAME`";`r`n"
     $tempConfigDataContent += "        PSDscAllowPlainTextPassword = `$true;`r`n"
     $tempConfigDataContent += "        PSDscAllowDomainUser = `$true;`r`n"
-    $tempConfigDataContent += "    }`r`n"    
+    $tempConfigDataContent += "    }`r`n"
 
     $Script:dscConfigContent += $tempConfigDataContent
     $Script:dscConfigContent += ")}`r`n"
@@ -254,7 +254,7 @@ function Get-ReverseDSC()
     <## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
     $fileName = "WebAdministrationDSC.ps1"
     $OutputDSCPath = Read-Host "Please enter the full path of the output folder for DSC Configuration (will be created as necessary)"
-    
+
     <## Ensures the specified output folder path actually exists; if not, tries to create it and throws an exception if we can't. ##>
     while (!(Test-Path -Path $OutputDSCPath -PathType Container -ErrorAction SilentlyContinue))
     {
