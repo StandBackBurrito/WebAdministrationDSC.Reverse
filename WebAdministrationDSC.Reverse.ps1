@@ -173,7 +173,7 @@ function Read-xWebsite()
         $results.AuthenticationInfo = $AuthenticationInfo
         $results.LogFlags = $results.LogFlags.Split(",")
 
-        $Script:dscConfigContent += "        xWebSite " + [System.Guid]::NewGuid().toString() + "`r`n"
+        $Script:dscConfigContent += "        xWebSite " + $website.Name.Replace(".","") + "`r`n"
         $Script:dscConfigContent += "        {`r`n"
         $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module -UseGetTargetResource
         $Script:dscConfigContent += "        }`r`n"
